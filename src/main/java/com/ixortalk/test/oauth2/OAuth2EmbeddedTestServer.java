@@ -43,55 +43,66 @@ import static org.springframework.core.Ordered.LOWEST_PRECEDENCE;
 @EnableAuthorizationServer
 public class OAuth2EmbeddedTestServer {
 
-  public static final String CLIENT_ID_ADMIN = "clientAdmin";
-  public static final String CLIENT_SECRET_ADMIN = "clientAdminSecret";
-  public static final String CLIENT_ID_USER = "clientUser";
-  public static final String CLIENT_SECRET_USER = "clientUserSecret";
+    public static final String CLIENT_ID_ADMIN = "clientAdmin";
+    public static final String CLIENT_SECRET_ADMIN = "clientAdminSecret";
 
-  @Configuration
-  @Order(LOWEST_PRECEDENCE - 1)
-  protected static class OAuth2Config extends AuthorizationServerConfigurerAdapter {
+    public static final String CLIENT_ID_USER = "clientUser";
+    public static final String CLIENT_SECRET_USER = "clientUserSecret";
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    public static final String CLIENT_ID_OTHER_USER = "otherClientUser";
+    public static final String CLIENT_SECRET_OTHER_USER = "otherClientUserSecret";
 
-    @Override
-    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-      endpoints.authenticationManager(authenticationManager);
+    @Configuration
+    @Order(LOWEST_PRECEDENCE - 1)
+    protected static class OAuth2Config extends AuthorizationServerConfigurerAdapter {
+
+        @Autowired
+        private AuthenticationManager authenticationManager;
+
+        @Override
+        public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+            endpoints.authenticationManager(authenticationManager);
+        }
+
+        @Override
+        public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+            clients
+                    .inMemory()
+                        .withClient(CLIENT_ID_ADMIN)
+                        .secret(CLIENT_SECRET_ADMIN)
+                        .authorizedGrantTypes("client_credentials")
+                        .scopes("openid")
+                        .authorities("ROLE_ADMIN")
+                    .and()
+                        .withClient(CLIENT_ID_USER)
+                        .secret(CLIENT_SECRET_USER)
+                        .authorizedGrantTypes("client_credentials")
+                        .scopes("openid")
+                        .authorities("ROLE_USER")
+                    .and()
+                        .withClient(CLIENT_ID_OTHER_USER)
+                        .secret(CLIENT_SECRET_OTHER_USER)
+                        .authorizedGrantTypes("client_credentials")
+                        .scopes("openid")
+                        .authorities("ROLE_USER");
+        }
     }
 
-    @Override
-    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-      clients.inMemory()
-                .withClient(CLIENT_ID_ADMIN)
-                  .secret(CLIENT_SECRET_ADMIN)
-                  .authorizedGrantTypes("client_credentials")
-                  .scopes("openid")
-                  .authorities("ROLE_ADMIN")
-              .and()
-                .withClient(CLIENT_ID_USER)
-                  .secret(CLIENT_SECRET_USER)
-                  .authorizedGrantTypes("client_credentials")
-                  .scopes("openid")
-                  .authorities("ROLE_USER");
+    @Configuration
+    @Order(-21)
+    protected static class LoginConfig extends WebSecurityConfigurerAdapter {
+
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http
+                    .requestMatchers()
+                    .antMatchers("/oauth/authorize", "/oauth/confirm_access")
+                    .and()
+                    .authorizeRequests()
+                    .anyRequest()
+                    .authenticated();
+        }
+
     }
-  }
-
-  @Configuration
-  @Order(-21)
-  protected static class LoginConfig extends WebSecurityConfigurerAdapter {
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      http
-              .requestMatchers()
-              .antMatchers("/oauth/authorize", "/oauth/confirm_access")
-              .and()
-              .authorizeRequests()
-              .anyRequest()
-              .authenticated();
-    }
-
-  }
 
 }

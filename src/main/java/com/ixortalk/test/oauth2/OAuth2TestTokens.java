@@ -38,6 +38,10 @@ public class OAuth2TestTokens {
         return getAccessToken(CLIENT_ID_USER, CLIENT_SECRET_USER);
     }
 
+    public static OAuth2AccessToken otherUserToken() {
+        return getAccessToken(CLIENT_ID_OTHER_USER, CLIENT_SECRET_OTHER_USER);
+    }
+
     public static OAuth2AccessToken getAccessToken(String clientId, String clientSecret) {
         return given()
                 .parameters("grant_type", "client_credentials")
