@@ -70,7 +70,7 @@ public class OAuth2EmbeddedTestServer {
                     .inMemory()
                         .withClient(CLIENT_ID_ADMIN)
                         .secret(CLIENT_SECRET_ADMIN)
-                        .authorizedGrantTypes("client_credentials")
+                        .authorizedGrantTypes("client_credentials", "password")
                         .scopes("openid")
                         .authorities("ROLE_ADMIN")
                     .and()
