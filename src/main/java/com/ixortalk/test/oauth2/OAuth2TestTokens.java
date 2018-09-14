@@ -27,7 +27,9 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.*;
 import static com.jayway.restassured.RestAssured.given;
+import static java.lang.String.format;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
+import static org.springframework.security.oauth2.common.OAuth2AccessToken.BEARER_TYPE;
 
 public class OAuth2TestTokens {
 
@@ -69,5 +71,13 @@ public class OAuth2TestTokens {
                 .formParam("client_secret", CLIENT_SECRET_ADMIN)
                 .post("/oauth/token")
                 .as(OAuth2AccessToken.class);
+    }
+
+    public static String authorizationHeader(OAuth2AccessToken oAuth2AccessToken) {
+        return authorizationHeader(oAuth2AccessToken.getValue());
+    }
+
+    public static String authorizationHeader(String accessToken) {
+        return format("%s %s", BEARER_TYPE, accessToken);
     }
 }
