@@ -29,7 +29,7 @@
 
 	<groupId>com.ixortalk</groupId>
 	<artifactId>ixortalk-test</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.4-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>ixortalk-test</name>
@@ -84,7 +84,7 @@
 		<connection>scm:git:git@github.com:ixortalkadmin/ixortalk-test.git</connection>
 		<developerConnection>scm:git:git@github.com:ixortalkadmin/ixortalk-test.git</developerConnection>
 		<url>https://github.com/ixortalkadmin/ixortalk-test/tree/master</url>
-		<tag>ixortalk-test-1.0.3</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<distributionManagement>
