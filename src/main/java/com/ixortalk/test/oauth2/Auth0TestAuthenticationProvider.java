@@ -24,6 +24,8 @@
 package com.ixortalk.test.oauth2;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
 import com.auth0.spring.security.api.authentication.PreAuthenticatedAuthenticationJsonWebToken;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -49,7 +51,7 @@ public class Auth0TestAuthenticationProvider implements AuthenticationProvider {
         return JwtAuthentication.class.isAssignableFrom(authentication);
     }
 
-    private static class Auth0TestAuthentication implements Authentication {
+    private static class Auth0TestAuthentication implements Authentication, JwtAuthentication {
 
         private final Authentication authentication;
 
@@ -62,9 +64,7 @@ public class Auth0TestAuthenticationProvider implements AuthenticationProvider {
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            String token = ((PreAuthenticatedAuthenticationJsonWebToken) authentication).getToken();
-
-            return JWT.decode(token)
+            return JWT.decode(extractToken(authentication))
                     .getClaim("authorities")
                     .asList(String.class)
                     .stream()
@@ -100,6 +100,25 @@ public class Auth0TestAuthenticationProvider implements AuthenticationProvider {
         @Override
         public String getName() {
             return "auth0-test-authentication-provider";
+        }
+
+        @Override
+        public String getToken() {
+            return extractToken(authentication);
+        }
+
+        @Override
+        public String getKeyId() {
+            throw new UnsupportedOperationException("Not supported when using " + Auth0TestAuthentication.class);
+        }
+
+        @Override
+        public Authentication verify(JWTVerifier verifier) throws JWTVerificationException {
+            throw new UnsupportedOperationException("Not supported when using " + Auth0TestAuthentication.class);
+        }
+
+        private static String extractToken(Authentication authentication) {
+            return ((PreAuthenticatedAuthenticationJsonWebToken) authentication).getToken();
         }
     }
 }
