@@ -26,6 +26,7 @@ package com.ixortalk.test.oauth2;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.spring.security.api.authentication.JwtAuthentication;
 import com.auth0.spring.security.api.authentication.PreAuthenticatedAuthenticationJsonWebToken;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -36,6 +37,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collection;
 
+import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toSet;
 
 public class Auth0TestAuthenticationProvider implements AuthenticationProvider {
@@ -64,12 +67,13 @@ public class Auth0TestAuthenticationProvider implements AuthenticationProvider {
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return JWT.decode(extractToken(authentication))
-                    .getClaim("authorities")
-                    .asList(String.class)
-                    .stream()
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(toSet());
+            return ofNullable(getClaim("authorities").asList(String.class))
+                    .map(authorities ->
+                            authorities
+                                    .stream()
+                                    .map(SimpleGrantedAuthority::new)
+                                    .collect(toSet()))
+                    .orElse(newHashSet());
         }
 
         @Override
@@ -84,7 +88,7 @@ public class Auth0TestAuthenticationProvider implements AuthenticationProvider {
 
         @Override
         public Object getPrincipal() {
-            return authentication.getPrincipal();
+            return getName();
         }
 
         @Override
@@ -99,7 +103,7 @@ public class Auth0TestAuthenticationProvider implements AuthenticationProvider {
 
         @Override
         public String getName() {
-            return "auth0-test-authentication-provider";
+            return ofNullable(getClaim("user_name").asString()).orElseGet(() -> getClaim("client_id").asString());
         }
 
         @Override
@@ -119,6 +123,10 @@ public class Auth0TestAuthenticationProvider implements AuthenticationProvider {
 
         private static String extractToken(Authentication authentication) {
             return ((PreAuthenticatedAuthenticationJsonWebToken) authentication).getToken();
+        }
+
+        private Claim getClaim(String claim) {
+            return JWT.decode(extractToken(authentication)).getClaim(claim);
         }
     }
 }
