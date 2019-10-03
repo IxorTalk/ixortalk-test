@@ -30,7 +30,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configurers.provisioning.InMemoryUserDetailsManagerConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -40,6 +42,9 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+
+import javax.inject.Inject;
+import java.util.List;
 
 import static org.springframework.core.Ordered.LOWEST_PRECEDENCE;
 
@@ -67,7 +72,8 @@ public class OAuth2EmbeddedTestServer {
 
         @Override
         public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-            endpoints.tokenStore(tokenStore())
+            endpoints
+                    .tokenStore(tokenStore())
                     .accessTokenConverter(accessTokenConverter())
                     .authenticationManager(authenticationManager);
         }
@@ -107,7 +113,11 @@ public class OAuth2EmbeddedTestServer {
 
     @Configuration
     @Order(TEST_WEB_SECURITY_CONFIG_ORDER)
+    @EnableWebSecurity
     protected static class LoginConfig extends WebSecurityConfigurerAdapter {
+
+        @Inject
+        private List<InMemoryUsersConfigurer> inMemoryUsersConfigurers;
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
@@ -122,8 +132,10 @@ public class OAuth2EmbeddedTestServer {
 
         @Autowired
         public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-            auth
-                    .inMemoryAuthentication()
+            InMemoryUserDetailsManagerConfigurer<AuthenticationManagerBuilder> inMemoryUserDetailsManagerConfigurer = auth
+                    .inMemoryAuthentication();
+
+            inMemoryUserDetailsManagerConfigurer
                         .withUser(USER_NAME)
                         .password(USER_PASSWORD)
                         .authorities("ROLE_USER")
@@ -131,7 +143,8 @@ public class OAuth2EmbeddedTestServer {
                         .withUser(OTHER_USER_NAME)
                         .password(OTHER_USER_PASSWORD)
                         .authorities("ROLE_USER");
+
+            inMemoryUsersConfigurers.forEach(configurer -> configurer.configure(inMemoryUserDetailsManagerConfigurer));
         }
     }
-
 }
