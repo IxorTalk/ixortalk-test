@@ -26,6 +26,8 @@ package com.ixortalk.test.oauth2;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_ID_ADMIN;
+import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_WITHOUT_ROLES_ID;
+import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_WITHOUT_ROLES_SECRET;
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.OTHER_USER_NAME;
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.USER_NAME;
 import static com.ixortalk.test.oauth2.OAuth2EmbeddedTestServer.CLIENT_SECRET_ADMIN;
@@ -39,6 +41,9 @@ public class OAuth2TestTokens {
 
     public static OAuth2AccessToken adminToken() {
         return getClientCredentialsAccessToken(CLIENT_ID_ADMIN, CLIENT_SECRET_ADMIN);
+    }
+    public static OAuth2AccessToken clientWithoutRolesToken() {
+        return getClientCredentialsAccessToken(CLIENT_WITHOUT_ROLES_ID, CLIENT_WITHOUT_ROLES_SECRET);
     }
 
     public static OAuth2AccessToken userToken() {

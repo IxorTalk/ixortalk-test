@@ -55,6 +55,9 @@ public class OAuth2EmbeddedTestServer {
     public static final String CLIENT_ID_ADMIN = "clientAdmin";
     public static final String CLIENT_SECRET_ADMIN = "clientAdminSecret";
 
+    public static final String CLIENT_WITHOUT_ROLES_ID = "clientWithoutRolesId";
+    public static final String CLIENT_WITHOUT_ROLES_SECRET = "clientWithoutRolesSecret";
+
     public static final String USER_NAME = "usersUsername";
     public static final String USER_PASSWORD = "usersPassword";
 
@@ -62,7 +65,6 @@ public class OAuth2EmbeddedTestServer {
     public static final String OTHER_USER_PASSWORD = "otherUsersPassword";
 
     public static final int TEST_WEB_SECURITY_CONFIG_ORDER = -21;
-
     @Configuration
     @Order(LOWEST_PRECEDENCE - 1)
     protected static class OAuth2Config extends AuthorizationServerConfigurerAdapter {
@@ -107,7 +109,12 @@ public class OAuth2EmbeddedTestServer {
                         .secret(CLIENT_SECRET_ADMIN)
                         .authorizedGrantTypes("client_credentials", "password")
                         .scopes("openid")
-                        .authorities("ROLE_ADMIN");
+                        .authorities("ROLE_ADMIN")
+                    .and()
+                        .withClient(CLIENT_WITHOUT_ROLES_ID)
+                        .secret(CLIENT_WITHOUT_ROLES_SECRET)
+                        .authorizedGrantTypes("client_credentials")
+                        .scopes("openid");
         }
     }
 
