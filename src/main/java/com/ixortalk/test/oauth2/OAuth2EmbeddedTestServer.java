@@ -43,9 +43,9 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
-import javax.inject.Inject;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.springframework.core.Ordered.LOWEST_PRECEDENCE;
 
 @Configuration
@@ -65,6 +65,7 @@ public class OAuth2EmbeddedTestServer {
     public static final String OTHER_USER_PASSWORD = "otherUsersPassword";
 
     public static final int TEST_WEB_SECURITY_CONFIG_ORDER = -21;
+
     @Configuration
     @Order(LOWEST_PRECEDENCE - 1)
     protected static class OAuth2Config extends AuthorizationServerConfigurerAdapter {
@@ -123,8 +124,8 @@ public class OAuth2EmbeddedTestServer {
     @EnableWebSecurity
     protected static class LoginConfig extends WebSecurityConfigurerAdapter {
 
-        @Inject
-        private List<InMemoryUsersConfigurer> inMemoryUsersConfigurers;
+        @Autowired(required = false)
+        private List<InMemoryUsersConfigurer> inMemoryUsersConfigurers = newArrayList();
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
